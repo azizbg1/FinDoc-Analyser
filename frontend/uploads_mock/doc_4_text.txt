@@ -1,0 +1,23 @@
+
+
+FACTURE
+Entreprise : ABC Technologies SARL
+12 Rue de Paris
+75015 Paris - France
+Facture N° : FAC-2026-00125
+Date : 15/06/2026
+Client : XYZ Consulting
+25 Avenue Victor Hugo
+75016 Paris - France
+Détail des prestations
+DésignationQuantitéPrix unitaire (€)Total (€)
+Développement Web105005000
+Maintenance Logicielle53001500
+Formation utilisateurs28001600
+Sous-total : 8100 €
+TVA (20 %) : 1620 €
+Total TTC indiqué : 9000 €
+Mode de paiement : Virement bancaire
+IBAN : FR76 3000 4000 5000 6000 7000 800
+Merci pour votre confiance.
+1

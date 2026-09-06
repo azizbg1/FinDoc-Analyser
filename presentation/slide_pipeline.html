@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>FinDoc AI — Pipeline des agents</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI','Calibri',system-ui,sans-serif;background:#fff;overflow:hidden;height:100vh;display:flex;flex-direction:column;}
+
+/* ── Arc top-left ─────────────────── */
+.arc{
+  position:absolute;top:-62px;left:-62px;
+  width:178px;height:178px;border-radius:50%;
+  background:linear-gradient(135deg,#1e40af,#6366f1);
+  z-index:4;display:flex;align-items:flex-end;justify-content:flex-end;padding:22px;
+}
+.arc-icon{font-size:29px;}
+
+/* ── Logo ────────────────────────── */
+.logo{position:absolute;top:14px;right:22px;z-index:10;text-align:center;}
+.logo-name{font-size:21px;font-weight:900;background:linear-gradient(90deg,#e11d48,#f59e0b,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.logo-sub{font-size:8px;color:#94a3b8;font-weight:600;letter-spacing:1px;text-transform:uppercase;}
+
+/* ── Title ───────────────────────── */
+h1{font-size:26px;font-weight:800;color:#e11d48;text-align:center;padding:20px 140px 0;position:relative;z-index:5;}
+
+/* ── Bottom bar ──────────────────── */
+.bbar{position:absolute;bottom:24px;left:36px;right:36px;height:2.5px;background:linear-gradient(90deg,#6366f1,#ec4899,rgba(255,255,255,0));z-index:10;}
+.snum{position:absolute;bottom:7px;right:20px;font-size:12.5px;color:#94a3b8;font-weight:700;z-index:10;}
+
+/* ── Pipeline container ──────────── */
+.pipeline{
+  position:relative;z-index:5;
+  flex:1;display:flex;flex-direction:column;
+  justify-content:center;
+  padding:6px 40px 46px;
+  gap:0;
+}
+
+/* ── Row ─────────────────────────── */
+.row{display:flex;align-items:center;gap:0;}
+
+/* ── Pill ────────────────────────── */
+.pill{
+  border-radius:100px;padding:9px 16px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;min-width:120px;flex-shrink:0;cursor:default;
+}
+.pill-name{font-size:12px;font-weight:700;line-height:1.3;}
+.pill-sub {font-size:9.5px;font-weight:500;opacity:.85;margin-top:2px;line-height:1.2;}
+
+/* ── Pill colors ─────────────────── */
+/* Row 1 — blue */
+.p-blue-in {background:#dbeafe;border:1.5px solid #93c5fd;color:#1e40af;}
+.p-blue    {background:#bfdbfe;border:1.5px solid #60a5fa;color:#1d4ed8;}
+.p-blue-out{background:#1e40af;border:1.5px solid #1e3a8a;color:#fff;box-shadow:0 3px 10px rgba(30,64,175,.3);}
+/* Row 2 — pink/rose */
+.p-pink    {background:#fce7f3;border:1.5px solid #f9a8d4;color:#9d174d;}
+.p-pink-out{background:#e11d48;border:1.5px solid #be123c;color:#fff;box-shadow:0 3px 10px rgba(225,29,72,.28);}
+/* Row 3 — green */
+.p-green   {background:#d1fae5;border:1.5px solid #6ee7b7;color:#065f46;}
+.p-green-out{background:#059669;border:1.5px solid #047857;color:#fff;box-shadow:0 3px 10px rgba(5,150,105,.28);}
+
+/* ── Horizontal dashed arrow ─────── */
+.h-arr{
+  flex:1;height:2px;
+  border-top:2px dashed;position:relative;align-self:center;min-width:18px;
+}
+.h-arr::after{
+  content:'▶';position:absolute;right:-8px;top:-8px;font-size:11px;
+}
+.arr-blue {border-color:#60a5fa;color:#60a5fa;}
+.arr-pink {border-color:#f9a8d4;color:#f9a8d4;}
+.arr-green{border-color:#6ee7b7;color:#6ee7b7;}
+.arr-gray {border-color:#cbd5e1;color:#cbd5e1;}
+
+/* ── Vertical section (between rows) */
+.v-section{
+  display:flex;align-items:center;gap:12px;
+  padding:4px 0 4px 30px;
+}
+.v-arr-wrap{display:flex;flex-direction:column;align-items:center;}
+.v-line{width:2px;height:22px;border-left:2px dashed #94a3b8;}
+.v-tri{color:#94a3b8;font-size:10px;margin-top:-2px;}
+.v-label{
+  font-size:11.5px;font-weight:600;font-style:italic;color:#475569;
+  background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;
+  padding:4px 14px;
+}
+</style>
+</head>
+<body>
+
+<div class="arc"><span class="arc-icon">⚙️</span></div>
+<div class="logo">
+  <div class="logo-name">ESPRIT</div>
+  <div class="logo-sub">École d'ingénieurs</div>
+</div>
+
+<h1>Pipeline et orchestration des agents</h1>
+
+<div class="pipeline">
+
+  <!-- ══ ROW 1 — OCR + Classification ══ -->
+  <div class="row">
+
+    <div class="pill p-blue-in">
+      <div class="pill-name">Input : PDF</div>
+      <div class="pill-sub">document financier</div>
+    </div>
+
+    <div class="h-arr arr-blue"></div>
+
+    <div class="pill p-blue">
+      <div class="pill-name">Agent OCR</div>
+      <div class="pill-sub">PaddleOCR</div>
+    </div>
+
+    <div class="h-arr arr-blue"></div>
+
+    <div class="pill p-blue">
+      <div class="pill-name">Agent Classification</div>
+      <div class="pill-sub">NLP · spaCy</div>
+    </div>
+
+    <div class="h-arr arr-blue"></div>
+
+    <div class="pill p-blue">
+      <div class="pill-name">Agent d'Extraction</div>
+      <div class="pill-sub">champs clés · montants</div>
+    </div>
+
+    <div class="h-arr arr-blue"></div>
+
+    <div class="pill p-blue-out" style="min-width:145px;">
+      <div class="pill-name">Document identifié</div>
+      <div class="pill-sub">type + texte extrait</div>
+    </div>
+
+  </div>
+
+  <!-- ── Vertical arrow + label ── -->
+  <div class="v-section">
+    <div class="v-arr-wrap">
+      <div class="v-line"></div>
+      <div class="v-tri">▼</div>
+    </div>
+    <div class="v-label">Document structuré + type identifié</div>
+  </div>
+
+  <!-- ══ ROW 2 — Anomalies + Score + Résumé ══ -->
+  <div class="row">
+
+    <div class="pill p-pink">
+      <div class="pill-name">Agent Anomalies</div>
+      <div class="pill-sub">Isolation Forest + SVM</div>
+    </div>
+
+    <div class="h-arr arr-pink"></div>
+
+    <div class="pill p-pink">
+      <div class="pill-name">Agent de Scoring</div>
+      <div class="pill-sub">score risque 0–100 %</div>
+    </div>
+
+    <div class="h-arr arr-pink"></div>
+
+    <div class="pill p-pink">
+      <div class="pill-name">Agent de Résumé</div>
+      <div class="pill-sub">Llama 3 · LLM</div>
+    </div>
+
+    <div class="h-arr arr-pink"></div>
+
+    <div class="pill p-pink">
+      <div class="pill-name">Agent de Rapport</div>
+      <div class="pill-sub">synthèse structurée</div>
+    </div>
+
+    <div class="h-arr arr-pink"></div>
+
+    <div class="pill p-pink-out" style="min-width:145px;">
+      <div class="pill-name">Rapport d'analyse</div>
+      <div class="pill-sub">anomalies + score + résumé</div>
+    </div>
+
+  </div>
+
+  <!-- ── Vertical arrow + label ── -->
+  <div class="v-section">
+    <div class="v-arr-wrap">
+      <div class="v-line"></div>
+      <div class="v-tri">▼</div>
+    </div>
+    <div class="v-label">Document à risque + résumé structuré + anomalies détectées</div>
+  </div>
+
+  <!-- ══ ROW 3 — RAG + Chat + Prédictions ══ -->
+  <div class="row">
+
+    <div class="pill p-green">
+      <div class="pill-name">Agent RAG</div>
+      <div class="pill-sub">ChromaDB · indexation</div>
+    </div>
+
+    <div class="h-arr arr-green"></div>
+
+    <div class="pill p-green">
+      <div class="pill-name">Agent de Chat</div>
+      <div class="pill-sub">Llama 3 · Q&amp;A</div>
+    </div>
+
+    <div class="h-arr arr-green"></div>
+
+    <div class="pill p-green">
+      <div class="pill-name">Agent Prédictif</div>
+      <div class="pill-sub">ML · historique</div>
+    </div>
+
+    <div class="h-arr arr-green"></div>
+
+    <div class="pill p-green">
+      <div class="pill-name">Agent Dashboard</div>
+      <div class="pill-sub">KPIs · visualisation</div>
+    </div>
+
+    <div class="h-arr arr-green"></div>
+
+    <div class="pill p-green-out" style="min-width:145px;">
+      <div class="pill-name">Dashboard &amp; Prédictions</div>
+      <div class="pill-sub">risques futurs · insights</div>
+    </div>
+
+  </div>
+
+</div><!-- end pipeline -->
+
+<div class="bbar"></div>
+<div class="snum">1</div>
+
+</body>
+</html>

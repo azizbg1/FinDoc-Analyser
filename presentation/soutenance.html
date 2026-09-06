@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>FinDoc Analyzer AI — Soutenance</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI','Calibri',system-ui,sans-serif;background:#1e1b4b;overflow:hidden;height:100vh;}
+
+/* ── Slide system ────────────────────────────────────────── */
+.slide{
+  position:absolute;inset:0;
+  opacity:0;pointer-events:none;
+  transition:opacity .32s ease,transform .32s ease;
+  transform:translateX(48px);
+  overflow:hidden;
+}
+.slide.active{opacity:1;pointer-events:all;transform:translateX(0);}
+.slide.out   {opacity:0;transform:translateX(-48px);}
+
+/* ── White slide scaffold ────────────────────────────────── */
+.ws{background:#fff;display:flex;flex-direction:column;}
+
+/* ── Arc top-left ────────────────────────────────────────── */
+.arc{
+  position:absolute;top:-60px;left:-60px;
+  width:175px;height:175px;border-radius:50%;
+  background:linear-gradient(135deg,#1e40af 0%,#6366f1 100%);
+  z-index:3;display:flex;align-items:flex-end;justify-content:flex-end;padding:18px;
+}
+.arc-icon{font-size:30px;}
+
+/* ── Logo top-right ──────────────────────────────────────── */
+.logo{
+  position:absolute;top:16px;right:24px;z-index:10;text-align:center;
+}
+.logo-name{
+  font-size:21px;font-weight:900;letter-spacing:-0.5px;
+  background:linear-gradient(90deg,#e11d48,#f59e0b,#22c55e);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.logo-sub{font-size:8.5px;color:#94a3b8;font-weight:600;letter-spacing:1px;text-transform:uppercase;}
+
+/* ── Slide title (pink/magenta) ──────────────────────────── */
+.stitle{
+  font-size:30px;font-weight:800;color:#e11d48;
+  text-align:center;padding:22px 130px 0;
+  position:relative;z-index:5;line-height:1.2;
+}
+.tbar{
+  width:70px;height:3px;border-radius:2px;
+  background:linear-gradient(90deg,#6366f1,#ec4899);
+  margin:10px auto 14px;
+}
+
+/* ── Body ────────────────────────────────────────────────── */
+.sbody{
+  padding:0 42px 52px;position:relative;z-index:5;flex:1;
+  display:flex;flex-direction:column;
+}
+
+/* ── Bottom gradient bar ─────────────────────────────────── */
+.bbar{
+  position:absolute;bottom:28px;left:38px;right:38px;
+  height:2px;background:linear-gradient(90deg,#6366f1,#ec4899,rgba(255,255,255,0));
+  z-index:10;
+}
+.snum{position:absolute;bottom:9px;right:22px;font-size:11.5px;color:#94a3b8;font-weight:600;z-index:10;}
+
+/* ── Illustration box ────────────────────────────────────── */
+.illus{
+  flex-shrink:0;width:200px;height:178px;border-radius:22px;
+  background:linear-gradient(135deg,#eff6ff,#e0e7ff);
+  display:flex;align-items:center;justify-content:center;
+  font-size:88px;border:1px solid #e2e8f0;
+}
+
+/* ── Dashed callout ──────────────────────────────────────── */
+.callout{
+  border:2.5px dashed #3b82f6;border-radius:18px;
+  padding:15px 18px;display:flex;align-items:center;gap:13px;
+  background:#fafbff;
+}
+.check{
+  width:36px;height:36px;border-radius:50%;background:#22c55e;
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:19px;font-weight:900;
+}
+.callout-txt{font-size:13px;font-weight:700;color:#1e40af;text-transform:uppercase;letter-spacing:.4px;line-height:1.4;}
+
+/* ── Body italic text ────────────────────────────────────── */
+.btext{font-size:14.5px;color:#1d4ed8;text-align:center;line-height:1.75;font-style:italic;font-weight:500;margin-top:14px;}
+
+/* ── Grid helpers ────────────────────────────────────────── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:13px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:11px;}
+.row{display:flex;gap:14px;}
+.col{display:flex;flex-direction:column;}
+.f1{flex:1;}
+
+/* ── Card ────────────────────────────────────────────────── */
+.card{background:#fff;border-radius:13px;padding:15px 17px;border:1px solid #e2e8f0;box-shadow:0 1px 5px rgba(0,0,0,.05);}
+.ci{font-size:25px;margin-bottom:7px;}
+.ct{font-size:13px;font-weight:700;color:#1e293b;margin-bottom:5px;}
+.cd{font-size:11.5px;color:#64748b;line-height:1.6;}
+.al{border-top:3px solid #3b82f6;}
+.av{border-top:3px solid #8b5cf6;}
+.ag{border-top:3px solid #10b981;}
+.ar{border-top:3px solid #ef4444;}
+.aa{border-top:3px solid #f59e0b;}
+
+/* ── Stats ───────────────────────────────────────────────── */
+.srow{display:flex;gap:13px;margin-bottom:16px;}
+.sbox{flex:1;border-radius:13px;padding:15px 12px;text-align:center;color:#fff;background:linear-gradient(135deg,#1e40af,#4f46e5);}
+.sn{font-size:34px;font-weight:900;line-height:1;}
+.sl{font-size:11px;opacity:.82;margin-top:4px;line-height:1.4;}
+
+/* ── Sommaire ────────────────────────────────────────────── */
+.ti{display:flex;align-items:center;gap:11px;background:#fff;border-radius:11px;padding:11px 15px;border:1px solid #e2e8f0;}
+.tn{width:26px;height:26px;border-radius:7px;flex-shrink:0;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;}
+.tl{font-size:13px;font-weight:600;color:#1e293b;}
+
+/* ── Objectifs ───────────────────────────────────────────── */
+.oi{display:flex;gap:11px;align-items:flex-start;margin-bottom:9px;}
+.on{width:28px;height:28px;border-radius:8px;flex-shrink:0;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;}
+.ot{font-size:13px;font-weight:700;color:#1e293b;}
+.od{font-size:11.5px;color:#64748b;margin-top:2px;}
+
+/* ── Comparison table ────────────────────────────────────── */
+.ct{width:100%;border-collapse:collapse;font-size:11.5px;}
+.ct th{background:linear-gradient(135deg,#1e40af,#4f46e5);color:#fff;padding:9px 10px;text-align:left;font-weight:700;white-space:nowrap;}
+.ct th:first-child{border-radius:9px 0 0 0;}
+.ct th:last-child{border-radius:0 9px 0 0;}
+.ct td{padding:7px 10px;border-bottom:1px solid #f1f5f9;color:#374151;}
+.ct tr:last-child td{border-bottom:none;}
+.ct tr:nth-child(even) td{background:#f8fafc;}
+.ct tr.our td{background:#eef2ff!important;font-weight:700;color:#1e40af;}
+.ct tr.our td:first-child{border-left:3px solid #6366f1;}
+.ck{color:#10b981;font-weight:700;font-size:13.5px;}
+.cx{color:#ef4444;font-size:13.5px;}
+.cp{color:#f59e0b;font-weight:600;}
+
+/* ── Architecture ────────────────────────────────────────── */
+.alayer{border-radius:11px;padding:10px 15px;margin-bottom:8px;display:flex;align-items:center;gap:12px;}
+.albl{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;width:80px;flex-shrink:0;}
+.aboxes{display:flex;gap:6px;flex-wrap:wrap;flex:1;}
+.abox{padding:4px 12px;border-radius:7px;font-size:11px;font-weight:600;border:1px solid;white-space:nowrap;}
+
+/* ── Sprints ─────────────────────────────────────────────── */
+.sp{background:#fff;border-radius:11px;padding:12px 14px;border:1px solid #e2e8f0;}
+.sph{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.spb{padding:2px 9px;border-radius:100px;font-size:10px;font-weight:700;background:#eef2ff;color:#4f46e5;}
+.spt{font-size:12px;font-weight:700;color:#1e293b;}
+.sit{display:flex;align-items:center;gap:7px;font-size:11px;color:#374151;margin-bottom:4px;}
+.sid{width:5px;height:5px;border-radius:50%;background:#6366f1;flex-shrink:0;}
+
+/* ── Requirements ────────────────────────────────────────── */
+.rh{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#6366f1;margin-bottom:6px;margin-top:10px;}
+.ri{display:flex;align-items:center;gap:8px;background:#fafbff;border-radius:8px;padding:7px 11px;border:1px solid #e2e8f0;font-size:12px;color:#374151;font-weight:500;margin-bottom:4px;}
+.rd{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+
+/* ── Problem ─────────────────────────────────────────────── */
+.prob{background:linear-gradient(135deg,#fef2f2,#fff7ed);border:1.5px solid #fca5a5;border-radius:13px;padding:15px 18px;display:flex;gap:13px;align-items:flex-start;margin-bottom:15px;}
+.pbi{font-size:26px;flex-shrink:0;}
+.pbt{font-size:13.5px;font-weight:700;color:#991b1b;margin-bottom:5px;}
+.pbd{font-size:12px;color:#7c3aed;line-height:1.6;}
+
+/* ── Conclusion ──────────────────────────────────────────── */
+.ri2{display:flex;gap:12px;align-items:center;background:#f8fafc;border-radius:11px;padding:11px 14px;border:1px solid #e2e8f0;margin-bottom:7px;}
+.ri2i{font-size:20px;flex-shrink:0;}
+.ri2t{font-size:13px;font-weight:700;color:#1e293b;}
+.ri2d{font-size:11px;color:#64748b;margin-top:1px;}
+
+/* ── Pipeline ────────────────────────────────────────────── */
+.pipe{display:flex;align-items:stretch;border-radius:13px;overflow:hidden;border:1px solid #e2e8f0;margin-bottom:16px;}
+.pp{flex:1;padding:13px 7px;text-align:center;background:#fff;border-right:1px solid #f1f5f9;}
+.pp:last-child{border-right:none;}
+.pa{display:flex;align-items:center;padding:0 1px;background:#f8fafc;color:#cbd5e1;font-size:12px;flex-shrink:0;}
+.ppi{font-size:22px;margin-bottom:4px;}
+.ppn{font-size:10.5px;font-weight:700;color:#1e293b;}
+.ppt{font-size:9px;color:#6366f1;margin-top:2px;font-weight:600;}
+
+/* ── Cover slide ─────────────────────────────────────────── */
+.cover{
+  background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 40%,#312e81 70%,#4f46e5 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:44px;position:relative;overflow:hidden;
+}
+.cc1{position:absolute;top:-70px;right:-70px;width:270px;height:270px;border-radius:50%;background:rgba(99,102,241,.18);}
+.cc2{position:absolute;bottom:-55px;left:-55px;width:210px;height:210px;border-radius:50%;background:rgba(236,72,153,.12);}
+.cover-t{font-size:52px;font-weight:900;color:#fff;line-height:1.1;margin-bottom:12px;position:relative;z-index:5;}
+.cover-sub{font-size:17.5px;color:rgba(255,255,255,.78);line-height:1.6;max-width:660px;margin:0 auto 26px;position:relative;z-index:5;}
+.cbadges{display:flex;gap:9px;flex-wrap:wrap;justify-content:center;margin-bottom:32px;position:relative;z-index:5;}
+.cb{padding:5px 15px;border-radius:100px;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:12px;font-weight:600;}
+.cauth{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:15px;padding:16px 26px;font-size:13.5px;color:rgba(255,255,255,.85);line-height:1.9;position:relative;z-index:5;}
+.cauth strong{color:#fff;}
+
+/* ── Nav ─────────────────────────────────────────────────── */
+.nav{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:13px;z-index:400;}
+.nb{width:36px;height:36px;border-radius:50%;cursor:pointer;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);color:#fff;font-size:19px;display:flex;align-items:center;justify-content:center;transition:background .18s;backdrop-filter:blur(8px);}
+.nb:hover{background:rgba(255,255,255,.24);}
+.dots{display:flex;gap:5px;}
+.dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.32);cursor:pointer;transition:all .28s;}
+.dot.on{background:#fff;width:22px;border-radius:4px;}
+#counter{position:fixed;top:15px;right:20px;color:rgba(255,255,255,.38);font-size:13px;z-index:400;font-weight:600;}
+.kh{position:fixed;bottom:15px;right:20px;color:rgba(255,255,255,.28);font-size:10.5px;z-index:400;}
+
+/* ── Highlight box ───────────────────────────────────────── */
+.hbox{background:linear-gradient(135deg,#eef2ff,#faf5ff);border:1px solid #c7d2fe;border-radius:13px;padding:14px 18px;}
+.htag{display:inline-flex;align-items:center;gap:5px;padding:3px 11px;border-radius:100px;background:linear-gradient(90deg,#3b82f6,#8b5cf6);color:#fff;font-size:10.5px;font-weight:700;margin-bottom:9px;}
+</style>
+</head>
+<body>
+
+<div id="counter">1 / 11</div>
+<div class="kh">← → · Espace · Clic</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 1 — COUVERTURE -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="slide cover active">
+  <div class="cc1"></div><div class="cc2"></div>
+  <div style="font-size:70px;margin-bottom:18px;position:relative;z-index:5;">📊</div>
+  <div class="cover-t">FinDoc Analyzer AI</div>
+  <div class="cover-sub">
+    Plateforme intelligente d'analyse automatisée de documents financiers<br>
+    basée sur un pipeline multi-agents IA
+  </div>
+  <div class="cbadges">
+    <span class="cb">🤖 Multi-Agents IA</span>
+    <span class="cb">🔍 OCR · NLP · ML</span>
+    <span class="cb">💬 Chat RAG · LLM</span>
+    <span class="cb">📈 Analyse Prédictive</span>
+  </div>
+  <div class="cauth">
+    <strong>Réalisée par :</strong> Benhaj Oumaima &nbsp;·&nbsp;
+    <strong>Encadrée par :</strong> [Nom Encadrant]<br>
+    <strong>Établissement :</strong> ESPRIT &nbsp;·&nbsp;
+    <strong>Année universitaire :</strong> 2025 – 2026
+  </div>
+  <div class="snum" style="color:rgba(255,255,255,.28);">1 / 11</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 2 — SOMMAIRE -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="slide ws">
+  <div class="arc"><span class="arc-icon">📋</span></div>
+  <div class="logo"><div class="logo-name">ESPRIT</div><div class="logo-sub">École d'ingénieurs</div></div>
+  <div class="stitle">Sommaire</div>
+  <div class="tbar"></div>
+  <div class="sbody" style="padding-top:0;">
+    <div class="g2" style="align-content:start;gap:10px;width:100%;">
+      <div class="ti"><div class="tn">1</div><div class="tl">Introduction</div></div>
+      <div class="ti"><div class="tn">2</div><div class="tl">Contexte &amp; Problématique</div></div>
+      <div class="ti"><div class="tn">3</div><div class="tl">Objectifs</div></div>
+      <div class="ti"><div class="tn">4</div><div class="tl">Étude de l'existant</div></div>
+      <div class="ti"><div class="tn">5</div><div class="tl">Solutions proposées</div></div>
+      <div class="ti"><div class="tn">6</div><div class="tl">Méthodologie</div></div>
+      <div class="ti"><div class="tn">7</div><div class="tl">Besoins fonctionnels &amp; non fonctionnels</div></div>
+      <div class="ti"><div class="tn">8</div><div class="tl">Architecture de la solution</div></div>
+      <div class="ti" style="grid-column:1/-1;max-width:49%;"><div class="tn">9</div><div class="tl">Conclusion &amp; Perspectives</div></div>
+    </div>
+  </div>
+  <div class="bbar"></div><div class="snum">2 / 11</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 3 — INTRODUCTION -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="slide ws">
+  <div class="arc"><span class="arc-icon">💡</span></div>
+  <div class="logo"><div class="logo-name">ESPRIT</div><div class="logo-sub">École d'ingénieurs</div></div>
+  <div class="stitle">Introduction</div>
+  <div class="tbar"></div>
+  <div class="sbody" style="padding-top:0;">
+
+    <div class="srow">
+      <div class="sbox"><div class="sn">80%</div><div class="sl">des fraudes financières<br>impliquent des documents</div></div>
+      <div class="sbox" style="background:linear-gradient(135deg,#7c3aed,#a855f7)"><div class="sn">3h</div><div class="sl">de traitement manuel<br>moyen par document</div></div>
+      <div class="sbox" style="background:linear-gradient(135deg,#059669,#10b981)"><div class="sn">95%</div><div class="sl">de précision visée<br>par notre système IA</div></div>
+    </div>
+
+    <div class="row" style="align-items:flex-start;gap:22px;flex:1;">
+      <div class="illus" style="height:auto;padding:18px 12px;flex-direction:column;gap:8px;width:180px;">
+        <div style="font-size:72px;">🤖</div>
+        <div style="font-size:13px;font-weight:700;color:#4f46e5;text-align:center;">IA Financière</div>
+      </div>
+      <div class="col f1" style="gap:12px;">
+        <div class="callout">
+          <div class="check">✓</div>
+          <div class="callout-txt">Automatisation de l'analyse<br>de documents financiers par IA</div>
+        </div>
+        <div class="callout" style="border-color:#8b5cf6;">
+          <div class="check" style="background:#8b5cf6;">✓</div>
+          <div class="callout-txt" style="color:#6d28d9;">Détection intelligente<br>des anomalies et des fraudes</div>
+        </div>
+        <div class="callout" style="border-color:#10b981;">
+          <div class="check" style="background:#10b981;">✓</div>
+          <div class="callout-txt" style="color:#047857;">Tableau de bord prédictif<br>basé sur l'historique IA</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="btext">
+      FinDoc Analyzer AI automatise l'ensemble de la chaîne documentaire financière :<br>
+      extraction, classification, détection d'anomalies, résumé LLM et chat RAG.
+    </div>
+  </div>
+  <div class="bbar"></div><div class="snum">3 / 11</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 4 — CONTEXTE & PROBLÉMATIQUE -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="slide ws">
+  <div class="arc"><span class="arc-icon">🔎</span></div>
+  <div class="logo"><div class="logo-name">ESPRIT</div><div class="logo-sub">École d'ingénieurs</div></div>
+  <div class="stitle">Contexte &amp; Problématique</div>
+  <div class="tbar"></div>
+  <div class="sbody" style="padding-top:0;">
+
+    <div class="prob">
+      <div class="pbi">⚠️</div>
+      <div>
+        <div class="pbt">Problématique centrale</div>
+        <div class="pbd">Comment automatiser l'analyse, la classification et la détection d'anomalies dans les documents financiers, tout en offrant une interface conversationnelle intelligente et un tableau de bord prédictif — sans outils propriétaires coûteux ?</div>
+      </div>
+    </div>
+
+    <div class="row" style="align-items:flex-start;gap:22px;flex:1;">
+      <div class="illus" style="height:auto;padding:18px 12px;flex-direction:column;gap:8px;width:180px;">
+        <div style="font-size:72px;">📂</div>
+        <div style="font-size:12px;font-weight:700;color:#ef4444;text-align:center;">Processus manuel</div>
+      </div>
+      <div class="col f1" style="gap:11px;">
+        <div class="callout" style="border-color:#ef4444;">
+          <div class="check" style="background:#ef4444;">!</div>
+          <div class="callout-txt" style="color:#991b1b;">Volume élevé de documents<br>traitement lent &amp; coûteux</div>
+        </div>
+        <div class="callout" style="border-color:#f59e0b;">
+          <div class="check" style="background:#f59e0b;">!</div>
+          <div class="callout-txt" style="color:#92400e;">Formats hétérogènes :<br>factures, reçus, rapports, bons</div>
+        </div>
+        <div class="callout" style="border-color:#8b5cf6;">
+          <div class="check" style="background:#8b5cf6;">!</div>
+          <div class="callout-txt" style="color:#6d28d9;">Anomalies difficiles à détecter<br>— fraudes inaperçues</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="btext">
+      Les entreprises traitent des milliers de documents par mois sans outils intégrés.<br>
+      Un processus manuel représente un risque opérationnel et financier majeur.
+    </div>
+  </div>
+  <div class="bbar"></div><div class="snum">4 / 11</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 5 — OBJECTIFS -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="slide ws">
+  <div class="arc"><span class="arc-icon">🎯</span></div>
+  <div class="logo"><div class="logo-name">ESPRIT</div><div class="logo-sub">École d'ingénieurs</div></div>
+  <div class="stitle">Objectifs du projet</div>
+  <div class="tbar"></div>
+  <div class="sbody" style="padding-top:0;">
+    <div class="g2" style="flex:1;align-content:start;gap:11px;">
+      <div class="oi"><div class="on">1</div><div><div class="ot">Extraction automatique OCR</div><div class="od">PaddleOCR lit les PDF scannés &amp; natifs avec une précision supérieure à 95 %.</div></div></div>
+      <div class="oi"><div class="on">2</div><div><div class="ot">Classification NLP automatique</div><div class="od">Identification du type de document : facture, reçu, bon de commande, rapport.</div></div></div>
+      <div class="oi"><div class="on">3</div><div><div class="ot">Détection d'anomalies ML</div><div class="od">Isolation Forest + SVM + règles métier pour repérer fraudes et incohérences.</div></div></div>
+      <div class="oi"><div class="on">4</div><div><div class="ot">Résumé structuré par LLM</div><div class="od">Llama 3 génère une synthèse contextuelle et structurée de chaque document.</div></div></div>
+      <div class="oi"><div class="on">5</div><div><div class="ot">Chat RAG sur les documents</div><div class="od">Questions-réponses en langage naturel via ChromaDB + Llama 3.</div></div></div>
+      <div class="oi"><div class="on">6</div><div><div class="ot">Dashboard analytique &amp; prédictif</div><div class="od">Métriques temps réel + prédictions IA sur les risques futurs par catégorie.</div></div></div>
+    </div>
+    <div class="btext">Six objectifs complémentaires couvrant l'intégralité du cycle de vie documentaire.</div>
+  </div>
+  <div class="bbar"></div><div class="snum">5 / 11</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 6 — ÉTUDE DE L'EXISTANT -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="slide ws">
+  <div class="arc"><span class="arc-icon">🔬</span></div>
+  <div class="logo"><div class="logo-name">ESPRIT</div><div class="logo-sub">École d'ingénieurs</div></div>
+  <div class="stitle">Étude de l'existant</div>
+  <div class="tbar"></div>
+  <div class="sbody" style="padding-top:0;">
+    <table class="ct" style="margin-bottom:13px;">
+      <thead>
+        <tr>
+          <th>Solution</th>
+          <th>OCR</th>
+          <th>Classification NLP</th>
+          <th>Anomalies</th>
+          <th>Résumé IA</th>
+          <th>Chat RAG</th>
+          <th>Prédictif</th>
+          <th>Open Source</th>
+          <th>Coût</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Docsumo</strong></td><td class="ck">✔</td><td class="ck">✔</td><td class="cx">✘</td><td class="cx">✘</td><td class="cx">✘</td><td class="cx">✘</td><td class="cx">✘</td><td>500 $/mois</td></tr>
+        <tr><td><strong>Rossum</strong></td><td class="ck">✔</td><td class="ck">✔</td><td class="cp">~</td><td class="cx">✘</td><td class="cx">✘</td><td class="cx">✘</td><td class="cx">✘</td><td>Enterprise</td></tr>
+        <tr><td><strong>Kofax/Tungsten</strong></td><td class="ck">✔</td><td class="ck">✔</td><td class="cx">✘</td><td class="cx">✘</td><td class="cx">✘</td><td class="cx">✘</td><td class="cx">✘</td><td>Très élevé</td></tr>
+        <tr><td><strong>Nanonets</strong></td><td class="ck">✔</td><td class="cp">~</td><td class="cx">✘</td><td class="cx">✘</td><td class="cx">✘</td><td class="cx">✘</td><td class="cx">✘</td><td>499 $/mois</td></tr>
+        <tr><td><strong>Adobe Acrobat AI</strong></td><td class="ck">✔</td><td class="cx">✘</td><td class="cx">✘</td><td class="cp">~</td><td class="cp">~</td><td class="cx">✘</td><td class="cx">✘</td><td>23 $/mois</td></tr>
+        <tr class="our"><td>⭐ <strong>FinDoc Analyzer AI</strong></td><td class="ck">✔</td><td class="ck">✔</td><td class="ck">✔</td><td class="ck">✔</td><td class="ck">✔</td><td class="ck">✔</td><td class="ck">✔</td><td><strong>Gratuit</strong></td></tr>
+      </tbody>
+    </table>
+    <div class="hbox">
+      <div class="htag">✨ Avantage concurrentiel</div>
+      <div style="font-size:12.5px;color:#374151;line-height:1.6;">
+        FinDoc Analyzer AI est la <strong>seule solution</strong> combinant OCR, NLP, détection d'anomalies ML, résumé LLM, Chat RAG <em>et</em> tableau de bord prédictif — <strong>open source, déployable localement, sans abonnement</strong>.
+      </div>
+    </div>
+  </div>
+  <div class="bbar"></div><div class="snum">6 / 11</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 7 — SOLUTIONS PROPOSÉES -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="slide ws">
+  <div class="arc"><span class="arc-icon">⚙️</span></div>
+  <div class="logo"><div class="logo-name">ESPRIT</div><div class="logo-sub">École d'ingénieurs</div></div>
+  <div class="stitle">Solutions proposées</div>
+  <div class="tbar"></div>
+  <div class="sbody" style="padding-top:0;">
+
+    <div class="pipe">
+      <div class="pp"><div class="ppi">📤</div><div class="ppn">Upload</div><div class="ppt">React · FastAPI</div></div>
+      <div class="pa">▶</div>
+      <div class="pp"><div class="ppi">🔠</div><div class="ppn">OCR</div><div class="ppt">PaddleOCR</div></div>
+      <div class="pa">▶</div>
+      <div class="pp"><div class="ppi">🏷️</div><div class="ppn">Classification</div><div class="ppt">NLP · spaCy</div></div>
+      <div class="pa">▶</div>
+      <div class="pp"><div class="ppi">🚨</div><div class="ppn">Anomalies</div><div class="ppt">Isolation Forest<br>+ SVM</div></div>
+      <div class="pa">▶</div>
+      <div class="pp"><div class="ppi">📝</div><div class="ppn">Résumé LLM</div><div class="ppt">Llama 3</div></div>
+      <div class="pa">▶</div>
+      <div class="pp"><div class="ppi">💬</div><div class="ppn">Chat RAG</div><div class="ppt">ChromaDB<br>+ Llama 3</div></div>
+    </div>
+
+    <div class="g3" style="flex:1;align-content:start;">
+      <div class="card al">
+        <div class="ci">⚡</div>
+        <div class="ct">Frontend réactif</div>
+        <div class="cd"><strong>React 18</strong> + Tailwind CSS + Framer Motion. Interface moderne, animations fluides, thème clair professionnel.</div>
+      </div>
+      <div class="card av">
+        <div class="ci">🔧</div>
+        <div class="ct">Backend robuste</div>
+        <div class="cd"><strong>FastAPI</strong> Python — API REST asynchrone, documentation Swagger, authentification JWT sécurisée.</div>
+      </div>
+      <div class="card ag">
+        <div class="ci">🧠</div>
+        <div class="ct">IA embarquée locale</div>
+        <div class="cd">Modèles ML entièrement locaux : <strong>Llama 3</strong> (résumé), <strong>ChromaDB</strong> (RAG), <strong>Isolation Forest</strong> (anomalies).</div>
+      </div>
+    </div>
+
+    <div class="btext">Pipeline de 6 agents IA indépendants orchestrés par FastAPI — sans dépendance cloud.</div>
+  </div>
+  <div class="bbar"></div><div class="snum">7 / 11</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 8 — MÉTHODOLOGIE -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="slide ws">
+  <div class="arc"><span class="arc-icon">📅</span></div>
+  <div class="logo"><div class="logo-name">ESPRIT</div><div class="logo-sub">École d'ingénieurs</div></div>
+  <div class="stitle">Méthodologie — Approche Agile</div>
+  <div class="tbar"></div>
+  <div class="sbody" style="padding-top:0;">
+    <div class="g2" style="flex:1;gap:13px;align-content:start;">
+      <div class="sp">
+        <div class="sph"><span class="spb">Sprint 1</span><span class="spt">Fondations &amp; OCR</span></div>
+        <div class="sit"><div class="sid"></div>Architecture FastAPI + React + SQLite</div>
+        <div class="sit"><div class="sid"></div>Intégration PaddleOCR pour extraction PDF</div>
+        <div class="sit"><div class="sid"></div>API REST + modèle de données documentaire</div>
+        <div class="sit"><div class="sid"></div>Page Upload avec pipeline de progression animé</div>
+      </div>
+      <div class="sp">
+        <div class="sph"><span class="spb">Sprint 2</span><span class="spt">Classification &amp; Anomalies</span></div>
+        <div class="sit"><div class="sid"></div>Agent classification NLP (4 types de documents)</div>
+        <div class="sit"><div class="sid"></div>Agent anomalies : Isolation Forest + SVM + règles</div>
+        <div class="sit"><div class="sid"></div>Score de risque 0–100 % par document</div>
+        <div class="sit"><div class="sid"></div>Dashboard document avec jauge de risque SVG</div>
+      </div>
+      <div class="sp">
+        <div class="sph"><span class="spb">Sprint 3</span><span class="spt">LLM &amp; Chat RAG</span></div>
+        <div class="sit"><div class="sid"></div>Intégration Llama 3 pour résumés automatiques</div>
+        <div class="sit"><div class="sid"></div>Indexation ChromaDB pour la recherche vectorielle</div>
+        <div class="sit"><div class="sid"></div>Interface de chat contextuel par document</div>
+        <div class="sit"><div class="sid"></div>Historique multi-documents et gestion des sessions</div>
+      </div>
+      <div class="sp">
+        <div class="sph"><span class="spb">Sprint 4</span><span class="spt">Dashboard &amp; Prédictions</span></div>
+        <div class="sit"><div class="sid"></div>Dashboard analytique global (KPIs, donut, rings)</div>
+        <div class="sit"><div class="sid"></div>Page Prédictions : modèle ML pondéré par historique</div>
+        <div class="sit"><div class="sid"></div>Refonte thème clair professionnel (WCAG AA)</div>
+        <div class="sit"><div class="sid"></div>Animations Framer Motion et optimisation UX</div>
+      </div>
+    </div>
+    <div class="btext">4 sprints Agile · Livraisons incrémentales · Tests à chaque itération</div>
+  </div>
+  <div class="bbar"></div><div class="snum">8 / 11</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 9 — BESOINS -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="slide ws">
+  <div class="arc"><span class="arc-icon">📋</span></div>
+  <div class="logo"><div class="logo-name">ESPRIT</div><div class="logo-sub">École d'ingénieurs</div></div>
+  <div class="stitle">Besoins fonctionnels &amp; non fonctionnels</div>
+  <div class="tbar"></div>
+  <div class="sbody" style="padding-top:0;">
+    <div class="g2" style="flex:1;gap:20px;align-content:start;">
+      <div>
+        <div class="rh">🔵 Besoins fonctionnels</div>
+        <div class="ri"><div class="rd" style="background:#3b82f6;"></div>Upload et stockage de documents PDF</div>
+        <div class="ri"><div class="rd" style="background:#3b82f6;"></div>Extraction de texte par OCR (PaddleOCR)</div>
+        <div class="ri"><div class="rd" style="background:#3b82f6;"></div>Classification automatique du type de document</div>
+        <div class="ri"><div class="rd" style="background:#3b82f6;"></div>Détection et scoring des anomalies ML</div>
+        <div class="ri"><div class="rd" style="background:#3b82f6;"></div>Génération de résumé structuré par LLM</div>
+        <div class="ri"><div class="rd" style="background:#3b82f6;"></div>Chat RAG en langage naturel sur les documents</div>
+        <div class="ri"><div class="rd" style="background:#3b82f6;"></div>Dashboard analytique temps réel (KPIs, risques)</div>
+        <div class="ri"><div class="rd" style="background:#3b82f6;"></div>Tableau de bord prédictif par catégorie</div>
+      </div>
+      <div>
+        <div class="rh">🟣 Besoins non fonctionnels</div>
+        <div class="ri"><div class="rd" style="background:#8b5cf6;"></div><div><strong>Performance</strong> — Analyse complète &lt; 30 s/document</div></div>
+        <div class="ri"><div class="rd" style="background:#8b5cf6;"></div><div><strong>Sécurité</strong> — Auth JWT, sessions sécurisées</div></div>
+        <div class="ri"><div class="rd" style="background:#8b5cf6;"></div><div><strong>Scalabilité</strong> — Architecture découplée Frontend/Backend</div></div>
+        <div class="ri"><div class="rd" style="background:#8b5cf6;"></div><div><strong>Maintenabilité</strong> — Agents modulaires indépendants</div></div>
+        <div class="ri"><div class="rd" style="background:#8b5cf6;"></div><div><strong>Ergonomie</strong> — Interface responsive WCAG AA</div></div>
+        <div class="ri"><div class="rd" style="background:#8b5cf6;"></div><div><strong>Disponibilité</strong> — API REST stable avec mock serveur</div></div>
+        <div class="ri"><div class="rd" style="background:#8b5cf6;"></div><div><strong>Portabilité</strong> — Déploiement local 100 % sans cloud</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="bbar"></div><div class="snum">9 / 11</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 10 — ARCHITECTURE -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="slide ws">
+  <div class="arc"><span class="arc-icon">🏗️</span></div>
+  <div class="logo"><div class="logo-name">ESPRIT</div><div class="logo-sub">École d'ingénieurs</div></div>
+  <div class="stitle">Architecture de la solution</div>
+  <div class="tbar"></div>
+  <div class="sbody" style="padding-top:0;">
+
+    <div class="alayer" style="background:#eff6ff;border:1px solid #bfdbfe;">
+      <div class="albl" style="color:#1e40af;">👤 Interface utilisateur</div>
+      <div class="aboxes">
+        <div class="abox" style="background:#dbeafe;border-color:#93c5fd;color:#1e40af;">React 18 + Vite</div>
+        <div class="abox" style="background:#dbeafe;border-color:#93c5fd;color:#1e40af;">Tailwind CSS</div>
+        <div class="abox" style="background:#dbeafe;border-color:#93c5fd;color:#1e40af;">Framer Motion</div>
+        <div class="abox" style="background:#dbeafe;border-color:#93c5fd;color:#1e40af;">React Router v6</div>
+        <div class="abox" style="background:#dbeafe;border-color:#93c5fd;color:#1e40af;">Axios</div>
+      </div>
+    </div>
+
+    <div style="text-align:center;font-size:16px;color:#94a3b8;padding:3px;">↕ API REST / HTTP</div>
+
+    <div class="alayer" style="background:#f5f3ff;border:1px solid #ddd6fe;">
+      <div class="albl" style="color:#7c3aed;">⚙️ API Backend</div>
+      <div class="aboxes">
+        <div class="abox" style="background:#ede9fe;border-color:#c4b5fd;color:#6d28d9;">FastAPI (Python)</div>
+        <div class="abox" style="background:#ede9fe;border-color:#c4b5fd;color:#6d28d9;">JWT Auth</div>
+        <div class="abox" style="background:#ede9fe;border-color:#c4b5fd;color:#6d28d9;">Pydantic</div>
+        <div class="abox" style="background:#ede9fe;border-color:#c4b5fd;color:#6d28d9;">Swagger UI</div>
+      </div>
+    </div>
+
+    <div style="text-align:center;font-size:16px;color:#94a3b8;padding:3px;">↕ Orchestration agents</div>
+
+    <div class="alayer" style="background:#faf5ff;border:1px solid #e9d5ff;">
+      <div class="albl" style="color:#7c3aed;">🤖 Agents IA</div>
+      <div class="aboxes">
+        <div class="abox" style="background:#f3e8ff;border-color:#d8b4fe;color:#7c3aed;">OCR · PaddleOCR</div>
+        <div class="abox" style="background:#f3e8ff;border-color:#d8b4fe;color:#7c3aed;">Classification · NLP</div>
+        <div class="abox" style="background:#f3e8ff;border-color:#d8b4fe;color:#7c3aed;">Anomalies · Isolation Forest</div>
+        <div class="abox" style="background:#f3e8ff;border-color:#d8b4fe;color:#7c3aed;">Résumé · Llama 3</div>
+        <div class="abox" style="background:#f3e8ff;border-color:#d8b4fe;color:#7c3aed;">RAG · ChromaDB</div>
+        <div class="abox" style="background:#f3e8ff;border-color:#d8b4fe;color:#7c3aed;">Prédictions · ML</div>
+      </div>
+    </div>
+
+    <div style="text-align:center;font-size:16px;color:#94a3b8;padding:3px;">↕ Persistance</div>
+
+    <div class="alayer" style="background:#f0fdf4;border:1px solid #bbf7d0;">
+      <div class="albl" style="color:#15803d;">🗄️ Données</div>
+      <div class="aboxes">
+        <div class="abox" style="background:#dcfce7;border-color:#86efac;color:#15803d;">SQLite (documents)</div>
+        <div class="abox" style="background:#dcfce7;border-color:#86efac;color:#15803d;">ChromaDB (vecteurs)</div>
+        <div class="abox" style="background:#dcfce7;border-color:#86efac;color:#15803d;">Système de fichiers (PDF)</div>
+      </div>
+    </div>
+  </div>
+  <div class="bbar"></div><div class="snum">10 / 11</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 11 — CONCLUSION -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="slide ws">
+  <div class="arc"><span class="arc-icon">🏆</span></div>
+  <div class="logo"><div class="logo-name">ESPRIT</div><div class="logo-sub">École d'ingénieurs</div></div>
+  <div class="stitle">Conclusion &amp; Perspectives</div>
+  <div class="tbar"></div>
+  <div class="sbody" style="padding-top:0;">
+    <div class="g2" style="flex:1;gap:18px;align-content:start;">
+      <div>
+        <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#22c55e;margin-bottom:10px;">✅ Réalisations</div>
+        <div class="ri2"><div class="ri2i">🔠</div><div><div class="ri2t">Pipeline OCR complet</div><div class="ri2d">Extraction précise sur PDF scannés &amp; natifs via PaddleOCR</div></div></div>
+        <div class="ri2"><div class="ri2i">🏷️</div><div><div class="ri2t">Classification NLP automatique</div><div class="ri2d">4 catégories de documents identifiées en temps réel</div></div></div>
+        <div class="ri2"><div class="ri2i">🚨</div><div><div class="ri2t">Détection d'anomalies ML</div><div class="ri2d">Isolation Forest + SVM + règles métier, score 0–100 %</div></div></div>
+        <div class="ri2"><div class="ri2i">💬</div><div><div class="ri2t">Chat RAG fonctionnel</div><div class="ri2d">Llama 3 + ChromaDB, réponses contextuelles sur les docs</div></div></div>
+        <div class="ri2"><div class="ri2i">📊</div><div><div class="ri2t">Dashboard + Prédictions IA</div><div class="ri2d">Métriques temps réel &amp; prédictions par catégorie/document</div></div></div>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#6366f1;margin-bottom:10px;">🚀 Perspectives</div>
+        <div class="ri2"><div class="ri2i">🔗</div><div><div class="ri2t">Intégration ERP</div><div class="ri2d">Connexion SAP, Odoo ou Sage pour synchronisation auto</div></div></div>
+        <div class="ri2"><div class="ri2i">🌍</div><div><div class="ri2t">Support multilingue</div><div class="ri2d">Extension arabe, anglais pour marchés internationaux</div></div></div>
+        <div class="ri2"><div class="ri2i">🎯</div><div><div class="ri2t">Fine-tuning LLM financier</div><div class="ri2d">Entraînement sur corpus financier tunisien/OHADA</div></div></div>
+        <div class="ri2"><div class="ri2i">📱</div><div><div class="ri2t">Application mobile</div><div class="ri2d">Scan &amp; analyse instantanée par photo iOS/Android</div></div></div>
+      </div>
+    </div>
+    <div style="margin-top:12px;text-align:center;padding:14px 18px;border-radius:13px;background:linear-gradient(135deg,#eef2ff,#faf5ff);border:1px solid #c7d2fe;">
+      <div style="font-size:17px;font-weight:800;color:#1e40af;margin-bottom:4px;">Merci pour votre attention 🙏</div>
+      <div style="font-size:12.5px;color:#64748b;">FinDoc Analyzer AI · ESPRIT 2025–2026 · Benhaj Oumaima</div>
+    </div>
+  </div>
+  <div class="bbar"></div><div class="snum">11 / 11</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- NAVIGATION -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="nav">
+  <button class="nb" onclick="go(-1)">&#8249;</button>
+  <div class="dots" id="dots"></div>
+  <button class="nb" onclick="go(1)">&#8250;</button>
+</div>
+
+<script>
+let cur=0;
+const slides=document.querySelectorAll('.slide');
+const N=slides.length;
+const dotsEl=document.getElementById('dots');
+const counterEl=document.getElementById('counter');
+
+slides.forEach((_,i)=>{
+  const d=document.createElement('div');
+  d.className='dot'+(i===0?' on':'');
+  d.onclick=()=>goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n){
+  slides[cur].classList.remove('active');
+  slides[cur].classList.add('out');
+  const p=cur;
+  cur=((n%N)+N)%N;
+  setTimeout(()=>slides[p].classList.remove('out'),380);
+  slides[cur].classList.add('active');
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i===cur));
+  counterEl.textContent=(cur+1)+' / '+N;
+}
+function go(d){goTo(cur+d);}
+
+document.addEventListener('keydown',e=>{
+  if(['ArrowRight','ArrowDown',' '].includes(e.key)){e.preventDefault();go(1);}
+  if(['ArrowLeft','ArrowUp'].includes(e.key)){e.preventDefault();go(-1);}
+});
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.nav')&&!e.target.closest('.dot'))go(1);
+});
+</script>
+</body>
+</html>

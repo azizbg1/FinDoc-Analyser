@@ -1,0 +1,33 @@
+
+
+FACTURE
+Entreprise émettrice :
+ACME SARL
+12 Rue de la Paix
+75001 Paris - France
+SIRET : 123 456 789 00010
+Téléphone : +33 1 45 67 89 00
+Email : contact@acme.fr
+Facture N° : FAC-2026-00125
+Date : 18/06/2026
+Client
+TECH CORP
+5 Avenue des Champs
+69001 Lyon - France
+Prestations
+DésignationQuantitéPrix unitaire (€)Total (€)
+Développement Web105005000
+Maintenance Logicielle53001500
+Formation utilisateurs28001600
+Sous-total HT : 8100 €
+TVA (20 %) : 1620 €
+Total TTC : 9720 €
+1
+
+Mode de paiement
+Virement bancaire
+IBAN : FR76 3000 4000 5000 6000 7000 800
+Date limite de paiement : 30/06/2026
+Merci pour votre confiance.
+ACME SARL
+2

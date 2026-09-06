@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>FinDoc AI — Contexte Général</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI','Calibri',system-ui,sans-serif;background:#1e1b4b;overflow:hidden;height:100vh;}
+
+/* ── Slide system ─────────────────────────────────── */
+.slide{
+  position:absolute;inset:0;background:#fff;overflow:hidden;
+  opacity:0;pointer-events:none;
+  transition:opacity .35s ease,transform .35s ease;
+  transform:translateX(50px);
+}
+.slide.active{opacity:1;pointer-events:all;transform:translateX(0);}
+.slide.out{opacity:0;transform:translateX(-50px);}
+
+/* ── Arc top-left ─────────────────────────────────── */
+.arc{
+  position:absolute;top:-62px;left:-62px;
+  width:178px;height:178px;border-radius:50%;
+  z-index:4;display:flex;align-items:flex-end;justify-content:flex-end;padding:22px;
+}
+.arc1{background:linear-gradient(135deg,#1e40af,#6366f1);}
+.arc2{background:linear-gradient(135deg,#7c3aed,#a855f7);}
+.arc-icon{font-size:30px;}
+
+/* ── Logo ESPRIT ──────────────────────────────────── */
+.logo{position:absolute;top:15px;right:22px;z-index:10;text-align:center;}
+.logo-name{
+  font-size:21px;font-weight:900;letter-spacing:-.5px;
+  background:linear-gradient(90deg,#e11d48,#f59e0b,#22c55e);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.logo-sub{font-size:8px;color:#94a3b8;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-top:-1px;}
+
+/* ── Title ────────────────────────────────────────── */
+.slide-title{
+  font-size:31px;font-weight:800;color:#e11d48;
+  text-align:center;padding:22px 140px 0;position:relative;z-index:5;
+}
+
+/* ── Bottom gradient bar ──────────────────────────── */
+.bbar{position:absolute;bottom:26px;left:38px;right:38px;height:2.5px;background:linear-gradient(90deg,#6366f1,#ec4899,rgba(255,255,255,0));z-index:10;}
+.snum{position:absolute;bottom:8px;right:22px;font-size:13px;color:#94a3b8;font-weight:700;z-index:10;}
+
+/* ══════════════════════════════════════════════════ */
+/* SLIDE 1 */
+/* ══════════════════════════════════════════════════ */
+
+.s1-content{
+  position:relative;z-index:5;
+  display:flex;align-items:center;justify-content:center;
+  gap:48px;padding:22px 70px 0;
+}
+
+/* Illustration box — robot IA */
+.illus-box{
+  width:205px;height:185px;border-radius:24px;flex-shrink:0;
+  background:linear-gradient(135deg,#e0f2fe,#dbeafe);
+  border:1.5px solid #bfdbfe;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+}
+.illus-emoji{font-size:90px;line-height:1;}
+.illus-label{font-size:12px;font-weight:700;color:#1e40af;letter-spacing:.5px;}
+
+/* Callout dashed box */
+.callout{
+  border:2.5px dashed #3b82f6;border-radius:20px;
+  padding:22px 24px;display:flex;align-items:center;gap:18px;
+  background:#fafbff;max-width:380px;
+}
+.check-circle{
+  width:46px;height:46px;border-radius:50%;background:#22c55e;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:24px;font-weight:900;
+  box-shadow:0 4px 12px rgba(34,197,94,.3);
+}
+.callout-text{
+  font-size:14.5px;font-weight:800;color:#1e40af;
+  text-transform:uppercase;letter-spacing:.5px;line-height:1.45;
+}
+
+/* Bottom italic text */
+.s1-bottom{
+  position:absolute;bottom:42px;left:0;right:0;
+  text-align:center;padding:0 70px;z-index:5;
+  font-size:15px;color:#1d4ed8;font-style:italic;font-weight:500;line-height:1.75;
+}
+
+/* ══════════════════════════════════════════════════ */
+/* SLIDE 2 */
+/* ══════════════════════════════════════════════════ */
+
+.s2-content{
+  position:relative;z-index:5;
+  display:flex;align-items:center;justify-content:center;
+  gap:28px;padding:14px 50px 54px;flex:1;
+}
+
+/* Left — input documents */
+.left-docs{
+  display:flex;flex-direction:column;align-items:center;gap:4px;width:148px;flex-shrink:0;
+}
+.docs-magnet{
+  width:130px;height:160px;
+  background:linear-gradient(135deg,#eff6ff,#e0e7ff);
+  border-radius:20px;border:1.5px solid #c7d2fe;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  position:relative;overflow:hidden;
+}
+.docs-center{font-size:44px;}
+.docs-orbit{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;padding:0 8px;}
+.doc-chip{
+  font-size:18px;background:#fff;border-radius:8px;padding:3px 6px;
+  border:1px solid #e0e7ff;box-shadow:0 1px 3px rgba(0,0,0,.06);
+}
+.left-label{font-size:11px;font-weight:700;color:#6366f1;text-align:center;margin-top:4px;}
+
+/* Center — funnel */
+.funnel{display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0;}
+.funnel-stage{
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-weight:800;font-size:13.5px;letter-spacing:.8px;
+  height:52px;position:relative;
+}
+.fs1{
+  width:230px;background:linear-gradient(135deg,#0ea5e9,#38bdf8);
+  clip-path:polygon(0 0,100% 0,90% 100%,10% 100%);
+  border-radius:4px 4px 0 0;
+}
+.fs2{
+  width:195px;background:linear-gradient(135deg,#10b981,#34d399);
+  clip-path:polygon(0 0,100% 0,90% 100%,10% 100%);
+}
+.fs3{
+  width:160px;background:linear-gradient(135deg,#ec4899,#f472b6);
+  clip-path:polygon(0 0,100% 0,85% 100%,15% 100%);
+}
+
+/* Small figures below funnel */
+.figures{display:flex;justify-content:center;gap:6px;margin-top:6px;}
+.fig{font-size:22px;}
+
+/* Dashed curved arrows */
+.arrow-left{
+  width:40px;align-self:center;
+  border-top:2px dashed #94a3b8;position:relative;
+}
+.arrow-left::after{
+  content:'▶';position:absolute;right:-8px;top:-9px;
+  color:#94a3b8;font-size:11px;
+}
+.arrow-right{
+  width:40px;align-self:center;
+  border-top:2px dashed #94a3b8;position:relative;
+}
+.arrow-right::after{
+  content:'▶';position:absolute;right:-8px;top:-9px;
+  color:#94a3b8;font-size:11px;
+}
+
+/* Right — results */
+.right-results{
+  display:flex;flex-direction:column;align-items:center;gap:4px;width:148px;flex-shrink:0;
+}
+.target-box{
+  width:130px;height:160px;
+  background:linear-gradient(135deg,#fdf4ff,#fce7f3);
+  border-radius:20px;border:1.5px solid #f9a8d4;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+}
+.target-emoji{font-size:58px;}
+.target-chips{display:flex;flex-direction:column;gap:4px;align-items:center;}
+.tchip{
+  font-size:9.5px;font-weight:700;padding:3px 9px;border-radius:100px;
+  color:#fff;white-space:nowrap;
+}
+.tc-red  {background:#ef4444;}
+.tc-amber{background:#f59e0b;}
+.tc-green{background:#22c55e;}
+.right-label{font-size:11px;font-weight:700;color:#ec4899;text-align:center;margin-top:4px;}
+
+/* ── Navigation ───────────────────────────────────── */
+.nav{
+  position:fixed;bottom:18px;left:50%;transform:translateX(-50%);
+  display:flex;align-items:center;gap:14px;z-index:400;
+}
+.nb{
+  width:38px;height:38px;border-radius:50%;cursor:pointer;
+  background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);
+  color:#fff;font-size:21px;display:flex;align-items:center;justify-content:center;
+  transition:background .18s;backdrop-filter:blur(8px);
+}
+.nb:hover{background:rgba(255,255,255,.26);}
+.dots-row{display:flex;gap:6px;}
+.dot{
+  width:9px;height:9px;border-radius:50%;
+  background:rgba(255,255,255,.32);cursor:pointer;transition:all .28s;
+}
+.dot.on{background:#fff;width:26px;border-radius:5px;}
+.counter{
+  position:fixed;top:15px;right:20px;
+  color:rgba(255,255,255,.38);font-size:13px;z-index:400;font-weight:600;
+}
+.hint{position:fixed;bottom:14px;right:20px;color:rgba(255,255,255,.28);font-size:10.5px;z-index:400;}
+</style>
+</head>
+<body>
+
+<div class="counter" id="counter">1 / 2</div>
+<div class="hint">← → · Clic</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SLIDE 1 — Contexte Général (callout style) -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="slide active">
+
+  <div class="arc arc1"><span class="arc-icon">📊</span></div>
+  <div class="logo">
+    <div class="logo-name">ESPRIT</div>
+    <div class="logo-sub">École d'ingénieurs</div>
+  </div>
+
+  <div class="slide-title">Contexte Général</div>
+
+  <!-- Main content -->
+  <div class="s1-content" style="margin-top:26px;">
+
+    <!-- Left: AI robot illustration -->
+    <div class="illus-box">
+      <div class="illus-emoji">🤖</div>
+      <div class="illus-label">FinDoc AI</div>
+    </div>
+
+    <!-- Right: dashed callout -->
+    <div class="callout">
+      <div class="check-circle">✓</div>
+      <div class="callout-text">
+        L'IA au service de<br>
+        l'analyse de documents<br>
+        financiers.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom italic text -->
+  <div class="s1-bottom">
+    Elle permet d'extraire, classifier et analyser automatiquement les documents financiers,<br>
+    de détecter les anomalies et de prédire les risques futurs grâce à l'intelligence artificielle.
+  </div>
+
+  <div class="bbar"></div>
+  <div class="snum">1</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SLIDE 2 — Contexte Général (pipeline funnel style) -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="slide">
+
+  <div class="arc arc2"><span class="arc-icon">⚙️</span></div>
+  <div class="logo">
+    <div class="logo-name">ESPRIT</div>
+    <div class="logo-sub">École d'ingénieurs</div>
+  </div>
+
+  <div class="slide-title">Contexte Général</div>
+
+  <!-- Main content -->
+  <div class="s2-content" style="margin-top:12px;">
+
+    <!-- Left: Input documents -->
+    <div class="left-docs">
+      <div class="docs-magnet">
+        <div class="docs-center">📂</div>
+        <div class="docs-orbit">
+          <span class="doc-chip">📄</span>
+          <span class="doc-chip">🧾</span>
+          <span class="doc-chip">📑</span>
+          <span class="doc-chip">📋</span>
+        </div>
+      </div>
+      <div class="left-label">Documents financiers<br>(PDF variés)</div>
+    </div>
+
+    <!-- Arrow left -->
+    <div class="arrow-left"></div>
+
+    <!-- Center: Funnel pipeline -->
+    <div class="funnel">
+      <div class="funnel-stage fs1">UPLOAD</div>
+      <div class="funnel-stage fs2">ANALYSE IA</div>
+      <div class="funnel-stage fs3">RAPPORT</div>
+      <div class="figures">
+        <span class="fig">🧑‍💻</span>
+        <span class="fig">👩‍💼</span>
+      </div>
+    </div>
+
+    <!-- Arrow right -->
+    <div class="arrow-right"></div>
+
+    <!-- Right: Results -->
+    <div class="right-results">
+      <div class="target-box">
+        <div class="target-emoji">🎯</div>
+        <div class="target-chips">
+          <span class="tchip tc-red">Risque élevé</span>
+          <span class="tchip tc-amber">Anomalie</span>
+          <span class="tchip tc-green">Conforme</span>
+        </div>
+      </div>
+      <div class="right-label">Résultats détectés<br>par le pipeline IA</div>
+    </div>
+
+  </div>
+
+  <div class="bbar"></div>
+  <div class="snum">2</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- Navigation -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="nav">
+  <button class="nb" onclick="go(-1)">&#8249;</button>
+  <div class="dots-row">
+    <div class="dot on" onclick="goTo(0)"></div>
+    <div class="dot"    onclick="goTo(1)"></div>
+  </div>
+  <button class="nb" onclick="go(1)">&#8250;</button>
+</div>
+
+<script>
+let cur = 0;
+const slides = document.querySelectorAll('.slide');
+const dots   = document.querySelectorAll('.dot');
+const counter= document.getElementById('counter');
+
+function goTo(n) {
+  slides[cur].classList.remove('active');
+  slides[cur].classList.add('out');
+  const prev = cur;
+  cur = ((n % 2) + 2) % 2;
+  setTimeout(() => slides[prev].classList.remove('out'), 370);
+  slides[cur].classList.add('active');
+  dots.forEach((d, i) => d.classList.toggle('on', i === cur));
+  counter.textContent = (cur + 1) + ' / 2';
+}
+function go(d) { goTo(cur + d); }
+
+document.addEventListener('keydown', e => {
+  if (['ArrowRight', ' ', 'ArrowDown'].includes(e.key)) { e.preventDefault(); go(1); }
+  if (['ArrowLeft', 'ArrowUp'].includes(e.key))         { e.preventDefault(); go(-1); }
+});
+document.addEventListener('click', e => {
+  if (!e.target.closest('.nav') && !e.target.closest('.dot')) go(1);
+});
+</script>
+</body>
+</html>
